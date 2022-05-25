@@ -1,4 +1,4 @@
-from tkinter import CASCADE
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import enum
@@ -6,7 +6,7 @@ import enum
 
 class User(AbstractUser):
 
-    dateOfBirth = models.DateField(verbose_name="Date of birth")
+    dateOfBirth = models.DateField(verbose_name="Date of birth", default=datetime.today)
 
 
 class CompanyType(enum.Enum):
@@ -30,8 +30,8 @@ class Entrepreneur(models.Model):
 
 class Company(models.Model):
 
-    name = models.CharField(verbose_name="Name")
-    type = models.CharField(verbose_name="Type", choices=CompanyType.choices())
+    name = models.CharField(verbose_name="Name", max_length=64)
+    type = models.CharField(verbose_name="Type", choices=CompanyType.choices(), max_length=128)
     logo = models.URLField(verbose_name="Logo")
     owner = models.ForeignKey(Entrepreneur, verbose_name="Owner", on_delete=models.CASCADE)
     foundingDate = models.DateField(verbose_name="Founding date")
@@ -40,8 +40,15 @@ class Company(models.Model):
 
 class Review(models.Model):
 
-    rating = models.IntegerField(verbose_name="Rating", choices=(1, 2, 3, 4, 5))
+    RATES = (
+        (1, "bad"), 
+        (2, "unsatisfactory"), 
+        (3, "satisfactorily"), 
+        (4, "good"), 
+        (5, "great")
+    ) 
+    rating = models.IntegerField(verbose_name="Rating", choices=RATES)
     reviewContent = models.TextField(verbose_name="Review content")
     date = models.DateField(verbose_name="Date of leaving the review", auto_now_add=True)
-    author = models.ForeignKey(User, verbose_name="Author", on_delete=CASCADE)
-    company = models.ForeignKey(Company, verbose_name="Company", on_delete=CASCADE)
+    # author = models.ForeignKey(User, verbose_name="Author", on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, verbose_name="Company", on_delete=models.CASCADE)
