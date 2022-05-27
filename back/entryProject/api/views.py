@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from api.serializers import *
 
 
@@ -78,6 +78,35 @@ class CompaniesListFiltered(APIView):
     permission_classes = (IsAuthenticated, )
 
 
+class CompaniesListSorted(APIView):
+    
+    def get(self, request):
+        avgRatingOfCompany = dict()
+        companies = Company.objects.all()
+        reviews = Review.objects.all()
+
+        # filling dict with init values
+        for company in companies:
+            avgRatingOfCompany[company.name] = []
+
+        # collecting data into dict
+        for review in reviews:
+            company = review.company.name
+            avgRatingOfCompany[company].append(review.rating)
+
+        # calculating averages 
+        for key in avgRatingOfCompany:
+            temp = avgRatingOfCompany.get(key)
+            avgRatingOfCompany[key] = sum(temp) / len(temp)
+
+        # sorting
+        sortedAvgRatingOfCompany = dict(sorted(avgRatingOfCompany.items(), key=lambda item: -item[1]))
+        for key in sortedAvgRatingOfCompany:
+            print(key, sortedAvgRatingOfCompany[key])
+
+        return Response(sortedAvgRatingOfCompany)
+
+
 class CompanyDetails(APIView):
 
     def getCompany(self, pk):
@@ -111,11 +140,35 @@ class ReviewLeaving(APIView):
 
         if serializer.is_valid():
             serializer.save()
+            self.notify()
             return Response(serializer.data)
 
         return Response(serializer.errors)    
 
     permission_classes = (IsAuthenticated, )
+
+    def notify(self):
+        # here could be the implementation of sending a message
+        pass
+
+
+class ReviewEditing(APIView):
+
+    def getReview(self, pk):
+        try:
+            return Review.objects.get(id=pk)
+        except Exception:
+            return Response({'message': 'An error occurred!'})
+
+    def put(self, request, pk):
+        review = self.getReview(pk)
+        serializer = ReviewInfoSerializer(instance=review, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors)
+
+    permission_classes = (IsAuthenticated, IsAdminUser, )
 
 
 class CompanyReviewsList(APIView):

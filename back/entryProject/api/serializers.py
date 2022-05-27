@@ -1,7 +1,3 @@
-from dataclasses import field
-from datetime import datetime
-import re
-from django.forms import CharField, ValidationError
 from rest_framework import serializers, validators
 from api.models import * 
 
@@ -87,6 +83,14 @@ class ReviewInfoSerializer(serializers.ModelSerializer):
 
         review.save()
         return review
+
+    def update(self, instance, validated_data):
+        instance.rating = validated_data.get('rating')
+        instance.reviewContent = validated_data.get('reviewContent')
+        instance.author = validated_data.get('author')
+        instance.company = validated_data.get('company')
+        instance.save()
+        return instance
 
 
 class ReviewDetailSerializer(serializers.ModelSerializer):
