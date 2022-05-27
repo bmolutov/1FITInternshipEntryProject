@@ -111,6 +111,7 @@ APIs implemented by DRF.
    appear in the list.
    * Send GET request, <code>http://localhost:8000/api/companies/sorted/</code>
 
+
 ## Auto-documentation
    For this purpose, __drf-spectacular__ is used.
    Getting file:
