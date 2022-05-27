@@ -1,1 +1,4 @@
 venv/
+back/entryProject/api/__pycache__/
+back/entryProject/entryProject/__pycache__/
+back/entryProject/.env
