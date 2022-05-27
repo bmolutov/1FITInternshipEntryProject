@@ -2,11 +2,27 @@ from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import enum
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 
-class User(AbstractUser):
+def validateAge(dateOfBirth):
+    age = (datetime.now().year - dateOfBirth.year)
+    print(age)
+    if age < 16:
+        raise ValidationError(
+            _('You are under 16 years of age!'),
+            params={'dateOfBirth': dateOfBirth},            
+        ) 
 
-    dateOfBirth = models.DateField(verbose_name="Date of birth", default=datetime.today)
+
+class CustomUser(AbstractUser):
+
+    dateOfBirth = models.DateField(
+        verbose_name="Date of birth", 
+        default=datetime.today,
+        validators=[validateAge],
+        )
 
 
 class CompanyType(enum.Enum):
@@ -37,6 +53,9 @@ class Company(models.Model):
     foundingDate = models.DateField(verbose_name="Founding date")
     lastModifiedDate = models.DateField(verbose_name="Last modified date", auto_now=True)
 
+    class Meta:
+        verbose_name_plural = 'Companies'
+
 
 class Review(models.Model):
 
@@ -50,5 +69,5 @@ class Review(models.Model):
     rating = models.IntegerField(verbose_name="Rating", choices=RATES)
     reviewContent = models.TextField(verbose_name="Review content")
     date = models.DateField(verbose_name="Date of leaving the review", auto_now_add=True)
-    # author = models.ForeignKey(User, verbose_name="Author", on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, verbose_name="Author", on_delete=models.CASCADE)
     company = models.ForeignKey(Company, verbose_name="Company", on_delete=models.CASCADE)
