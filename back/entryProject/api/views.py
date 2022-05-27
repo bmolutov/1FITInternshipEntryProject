@@ -132,10 +132,10 @@ class ReviewLeaving(APIView):
         leftReviews = Review.objects.all()
         leftReviews = [review for review in leftReviews if review.author.id == int(author)]
         
-        companies = [review.company.id for review in leftReviews]
+        companies = [str(review.company.id) for review in leftReviews]
         company = request.data.get('company')
 
-        if int(company) in companies:
+        if company in companies:
             return Response({'error': 'You have already reviewed this company!'})
 
         if serializer.is_valid():

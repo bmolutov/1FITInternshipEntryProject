@@ -20,9 +20,12 @@ class CustomUser(AbstractUser):
 
     dateOfBirth = models.DateField(
         verbose_name="Date of birth", 
-        default=datetime.today,
+        # default=datetime.today,
         validators=[validateAge],
         )
+
+    def __str__(self):
+        return self.email
 
 
 class CompanyType(enum.Enum):
@@ -43,6 +46,9 @@ class Entrepreneur(models.Model):
     email = models.EmailField(verbose_name="Email", max_length=64)
     tel = models.CharField(verbose_name="Telephone number", max_length=12)
 
+    def __str__(self):
+        return self.email
+
 
 class Company(models.Model):
 
@@ -55,6 +61,9 @@ class Company(models.Model):
 
     class Meta:
         verbose_name_plural = 'Companies'
+
+    def __str__(self):
+        return self.name
 
 
 class Review(models.Model):
@@ -71,3 +80,6 @@ class Review(models.Model):
     date = models.DateField(verbose_name="Date of leaving the review", auto_now_add=True)
     author = models.ForeignKey(CustomUser, verbose_name="Author", on_delete=models.CASCADE)
     company = models.ForeignKey(Company, verbose_name="Company", on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.reviewContent
